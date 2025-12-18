@@ -21,16 +21,19 @@ public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "wallet_id")
-    @Comment("월렛 아이디")
+    @Comment("월렛 ID")
     private Long walletId;
 
     @Column(nullable = false)
+    @Comment("잔액")
     private Long balance;
 
     @Column(name = "created_at", nullable = false)
+    @Comment("생성 일시")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
+    @Comment("수정 일시")
     private LocalDateTime updatedAt;
 
     public Wallet withdraw(Long amount) {

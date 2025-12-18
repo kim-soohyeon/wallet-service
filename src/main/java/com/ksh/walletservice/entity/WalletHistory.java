@@ -21,15 +21,15 @@ public class WalletHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "wallet_history_id")
-    @Comment("월렛 내역 아이디")
+    @Comment("입출금 내역 ID")
     private Long walletHistoryId;
 
     @Column(name = "transaction_id", nullable = false, unique = true, length = 36)
-    @Comment("거래 고유 아이디")
+    @Comment("거래 고유 ID")
     private String transactionId;
 
     @Column(name = "wallet_id")
-    @Comment("월렛 아이디")
+    @Comment("월렛 ID")
     private Long walletId;
 
     @Column(nullable = false)
@@ -46,6 +46,7 @@ public class WalletHistory {
     private WithdrawalStatus status;
 
     @Column(name = "created_at", nullable = false)
+    @Comment("생성 일시")
     private LocalDateTime createdAt;
 
 }
