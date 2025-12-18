@@ -22,17 +22,17 @@ public class WalletService {
     @Transactional
     public WithdrawalResponse withdraw(Long walletId, Long amount, String transactionId) {
 
-        Wallet wallet = walletRepository.findLockedByWalletId(walletId)
-                .orElseThrow(() -> new CoreException(ErrorType.WALLET_NOT_FOUND, walletId));
-
         int inserted = walletHistoryRepository.insertIgnore(
-                transactionId, walletId, amount, wallet.getBalance(), WithdrawalStatus.PENDING.name()
+                transactionId, walletId, amount, 0L, WithdrawalStatus.PENDING.name()
         );
         if (inserted == 0) {
             WalletHistory existing = walletHistoryRepository.findByTransactionId(transactionId)
                     .orElseThrow(() -> new CoreException(ErrorType.TX_NOT_FOUND, transactionId));
             return WithdrawalResponse.from(existing);
         }
+
+        Wallet wallet = walletRepository.findLockedByWalletId(walletId)
+                .orElseThrow(() -> new CoreException(ErrorType.WALLET_NOT_FOUND, walletId));
 
         Wallet updatedWallet = wallet.withdraw(amount);
         walletRepository.save(updatedWallet);

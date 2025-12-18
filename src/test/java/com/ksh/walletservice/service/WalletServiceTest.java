@@ -42,7 +42,6 @@ class WalletServiceTest {
     private final Long balance = 1000L;
 
     @Test
-    @DisplayName("출금 성공 시 잔액 차감 및 거래 이력 업데이트")
     void withdraw_success() {
         Long finalBalance = balance - amount;
         // Given
@@ -89,9 +88,7 @@ class WalletServiceTest {
                 WithdrawalStatus.SUCCESS,
                 now
         );
-        Wallet wallet = new Wallet(walletId, balance, now, now);
 
-        given(walletRepository.findLockedByWalletId(walletId)).willReturn(Optional.of(wallet));
         given(walletHistoryRepository.insertIgnore(any(), any(), any(), any(), any())).willReturn(0);
         given(walletHistoryRepository.findByTransactionId(transactionId)).willReturn(Optional.of(history));
 
@@ -99,12 +96,15 @@ class WalletServiceTest {
         WithdrawalResponse response = walletService.withdraw(walletId, amount, transactionId);
 
         // Then
+
         assertThat(response).isNotNull();
         assertThat(response.balance()).isEqualTo(finalBalance); // 900L
 
+        verify(walletRepository, never()).findLockedByWalletId(any());
         verify(walletRepository, never()).save(any());
         verify(walletHistoryRepository, never()).updateBalanceByTransactionId(any(), any(), any());
     }
+
 
     @Test
     @DisplayName("잔액 부족 시 실패 CoreException을 던져야 한다.")
@@ -113,6 +113,15 @@ class WalletServiceTest {
         Long largeAmount = 5000L;
 
         LocalDateTime now = LocalDateTime.of(2025, 12, 16, 10, 0);
+        WalletHistory history = new WalletHistory(
+                1L,
+                transactionId,
+                walletId,
+                largeAmount,
+                balance,
+                WithdrawalStatus.PENDING,
+                now
+        );
         Wallet wallet = new Wallet(walletId, balance, now, now);
 
         given(walletRepository.findLockedByWalletId(walletId)).willReturn(Optional.of(wallet));
@@ -128,5 +137,5 @@ class WalletServiceTest {
         verify(walletRepository, never()).save(any(Wallet.class));
         verify(walletHistoryRepository, never()).updateBalanceByTransactionId(any(), any(), any());
     }
-    
+
 }
